@@ -27,7 +27,6 @@ internal sealed class MapLoader( Entry entry ) : SceneLoader<GtaMount>
 {
 	protected override void BuildScene()
 	{
-		MountTypes.EnsureRegistered();
 		using var data = Host.Read( entry );
 		Placements.Build( Host, data, null );
 		int collisionCount = data.ReadInt32();
@@ -102,7 +101,7 @@ internal static class Placements
 				if ( prop is not null )
 				{
 					if ( (flags & PlacementFlags.Fixed) != 0 ) prop.IsStatic = true;
-					if ( (flags & PlacementFlags.SuppressEmbeddedCollision) != 0 ) placed.Components.GetOrCreate<GtaPropPhysics>();
+					if ( (flags & PlacementFlags.SuppressEmbeddedCollision) != 0 ) prop.PhysicsEnabled = false;
 				}
 				else if ( (flags & PlacementFlags.SuppressEmbeddedCollision) != 0 )
 				{
@@ -127,7 +126,6 @@ internal sealed class ArchetypeLoader( Entry entry ) : ResourceLoader<GtaMount>
 	PrefabFile prefab;
 	protected override object Load()
 	{
-		MountTypes.EnsureRegistered();
 		using var data = Host.Read( entry );
 		var modelName = data.Text();
 		var flags = (ArchetypeFlags)data.ReadUInt32();

@@ -20,6 +20,7 @@ internal sealed partial class AssetLoader( Entry entry ) : ResourceLoader<GtaMou
 	LinkedListNode<(long Bytes, Action Evict)> retention;
 	internal Model PreparedModel => retainedResource as Model ??
 		(preparedModel is not null && preparedModel.TryGetTarget( out var model ) ? model : null);
+	protected override bool UseWeakResourceCache => entry.Kind is Kind.Model or Kind.DictionaryModel or Kind.Collision or Kind.Texture;
 	internal Entry SourceEntry => entry;
 	internal BinaryReader ReadPacket()
 	{
@@ -486,7 +487,7 @@ internal sealed partial class AssetLoader( Entry entry ) : ResourceLoader<GtaMou
 		var model = builder.Create();
 		GtaDestructionPresentation.Register( model, destruction );
 		preparedModel = new( model );
-		if ( entry.Kind is Kind.Model or Kind.DictionaryModel or Kind.Collision ) Retain( model, retainedBytes );
+		if ( UseWeakResourceCache ) Retain( model, retainedBytes );
 		return model;
 	}
 

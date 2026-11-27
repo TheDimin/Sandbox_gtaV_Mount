@@ -34,7 +34,7 @@ public sealed class GtaMount : BaseGameMount, IGtaWorldSource
 	{
 		if ( !OperatingSystem.IsWindows() ) return;
 		var rockstar = Registry.GetValue( @"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Rockstar Games\GTAV Enhanced", "InstallFolder", null ) as string;
-		directory = new[] { Environment.GetEnvironmentVariable( "GTA_V_ENHANCED_DIR" ), rockstar }
+		directory = new[] { Environment.GetEnvironmentVariable( "GTA_V_ENHANCED_DIR" ), context.GetFileSystem( 3240220 )?.GetFullPath( "/" ), rockstar }
 			.FirstOrDefault( x => !string.IsNullOrWhiteSpace( x ) && File.Exists( Path.Combine( x, "GTA5_Enhanced.exe" ) ) && File.Exists( Path.Combine( x, "common.rpf" ) ) );
 		IsInstalled = directory is not null;
 	}
@@ -98,7 +98,6 @@ public sealed class GtaMount : BaseGameMount, IGtaWorldSource
 			context.Add( ResourceType.GameResource, CoronaLoader.PathName, new CoronaLoader() );
 			context.Add( ResourceType.Scene, "gtaV", new WorldLoader() );
 			TextureAssets = textureAssets;
-			MountTypes.EnsureRegistered();
 			IsMounted = true;
 			return Task.CompletedTask;
 		}

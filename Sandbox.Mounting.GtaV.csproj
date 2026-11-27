@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <GtaVUseBorealisGeometry Condition="'$(GtaVUseBorealisGeometry)' == ''">true</GtaVUseBorealisGeometry>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <SboxEngineDir Condition="'$(SboxEngineDir)' == ''">$(FACEPUNCH_ENGINE)</SboxEngineDir>

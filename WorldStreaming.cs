@@ -15,7 +15,6 @@ internal sealed class WorldLoader : SceneLoader<GtaMount>
 
 	protected override void BuildScene()
 	{
-		MountTypes.EnsureRegistered();
 		new GameObject( true, "GTA World" ).AddComponent<GtaWorld>();
 		var spawn = new GameObject( true, "Player Spawn" ) { WorldPosition = StartPosition };
 		spawn.AddComponent<SpawnPoint>();
@@ -477,9 +476,6 @@ internal sealed class WorldSession : IGtaWorldSession
 			{
 				seaMaterial = Material.Load( "materials/water/water.vmat" ).CreateCopy();
 				seaMaterial.Set( "g_fRoughness", 0.16f );
-				// The stock water renderer skips refraction captures on opaque materials.
-				seaMaterial.Set( "Opacity", 1f );
-				seaMaterial.Set( "UndersideOpacity", 1f );
 			}
 			waterBodies.Add( next, next.Create( owner, seaMaterial ) );
 			distantSea?.Hide( next );

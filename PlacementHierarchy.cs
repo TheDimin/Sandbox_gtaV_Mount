@@ -25,7 +25,7 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 	readonly HashSet<Placement> pendingPromotion = new();
 	readonly GameObject dynamicRoot = new GameObject( world.Scene, true, "GtaWorldDynamic" )
 	{
-		Flags = GameObjectFlags.NotSaved | GameObjectFlags.NotNetworked
+		Flags = GameObjectFlags.NotSaved | GameObjectFlags.NotNetworked | GameObjectFlags.GroupRoots
 	};
 
 	internal GameObject AddModel( LodEntityId id, WorldEntity entity, Model model, bool physics )
@@ -46,6 +46,7 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 				p.Prop = obj.AddComponent<Prop>();
 				p.Prop.IsStatic = anchored;
 				p.Prop.StartAsleep = true;
+				p.Prop.PhysicsEnabled = physics;
 				p.Prop.Model = model;
 				GtaDestructionPresentation.Attach( p.Prop );
 				if ( entity.IsObject ) p.Prop.Health = ArchetypePhysics.ObjectHealth;
@@ -56,7 +57,6 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 				if ( p.Seats.Length > 0 ) p.Prop.OnPropBreak += () => ChairArchetypes.Eject( p.Seats );
 			}
 			obj.Enabled = true;
-			if ( p.Prop.IsValid() ) GtaPropPhysics.Apply( p.Prop, physics );
 			if ( !anchored && p.Prop.IsValid() )
 			{
 				var origin = obj.WorldTransform;
@@ -75,7 +75,7 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 		{
 			p.Physics = true;
 			SetSeatTriggers( p, true );
-			if ( p.Prop.IsValid() ) GtaPropPhysics.Apply( p.Prop, true );
+			if ( p.Prop.IsValid() ) p.Prop.PhysicsEnabled = true;
 			else
 			{
 				p.Collider = p.Object.Components.GetOrCreate<ModelCollider>();
@@ -138,7 +138,7 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 			{
 				ChairArchetypes.Eject( p.Seats );
 				SetSeatTriggers( p, false );
-				if ( p.Prop.IsValid() ) GtaPropPhysics.Apply( p.Prop, false );
+				if ( p.Prop.IsValid() ) p.Prop.PhysicsEnabled = false;
 				if ( p.Collider.IsValid() ) p.Collider.Enabled = false;
 			}
 			else Display( obj, false );
@@ -171,7 +171,7 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 			if ( !p.Object.IsValid() ) continue;
 			var pos = p.Object.WorldPosition;
 			bool physics = physical.DistanceSquared( pos / PacketReader.UnitsPerMetre ) <= 80 * 80;
-			GtaPropPhysics.Apply( p.Prop, physics );
+			p.Prop.PhysicsEnabled = physics;
 			SetSeatTriggers( p, physics );
 			var distance = p.LodDistance * Sandbox.Mounting.GtaWorldStreamingSystem.LodScale * PacketReader.UnitsPerMetre;
 			SetRendererEnabled( p.Object, camera.HasValue && (distance <= 0 || pos.DistanceSquared( camera.Value ) <= distance * distance) );
