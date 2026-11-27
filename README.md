@@ -7,7 +7,7 @@ This Windows mount reads the installed GTA V Enhanced archives and creates s&box
 Install the .NET 10 SDK and build the s&box fork. Set `GTA_V_ENHANCED_DIR` to the folder that contains `GTA5_Enhanced.exe` and `common.rpf`, or use the Rockstar installation found in the Windows registry. The managed reader uses the local [ragekit key files](https://github.com/RatPrez/ragekit/blob/9d4110ef0fce900787aaeccb52b67fa5402ff41b/docs/archives.md#keys) in `%USERPROFILE%/.ragekit/keys`.
 
 ```powershell
-dotnet build -c Release -p:SboxEngineDir=E:/Projects/sbox-public/game
+dotnet build -c Release -p:SboxEngineDir=<path-to-sbox-game>
 ```
 
 `SboxEngineDir` defaults to `FACEPUNCH_ENGINE`. Set `SboxManagedDir` to use assemblies from a separate build directory. Copy `Sandbox.Mounting.GtaV.dll`, `Assets`, and `licenses` from `bin/Release` to `mounts/gtav` under the fork's game directory. Use the fork's shader builder if its shader format differs from the bundled files.
@@ -26,8 +26,8 @@ The mount uses the engine's prop damage, fragmentation, and explosion physics. I
 Build both variants against the same fork assemblies. The optimized variant uses the fork's stored-geometry APIs and the friend assembly declarations for `Sandbox.Mounting.GtaV`. Use the same renderer, route, camera, and settings for both runs.
 
 ```powershell
-dotnet build -c Release -p:SboxEngineDir=E:/Projects/sbox-public/game -p:GtaVUseBorealisGeometry=false -p:OutputPath=bin/benchmark-legacy
-dotnet build -c Release -p:SboxEngineDir=E:/Projects/sbox-public/game -p:GtaVUseBorealisGeometry=true -p:OutputPath=bin/benchmark-borealis
+dotnet build -c Release -p:SboxEngineDir=<path-to-sbox-game> -p:GtaVUseBorealisGeometry=false -p:OutputPath=bin/benchmark-legacy
+dotnet build -c Release -p:SboxEngineDir=<path-to-sbox-game> -p:GtaVUseBorealisGeometry=true -p:OutputPath=bin/benchmark-borealis
 ```
 
 Borealis is enabled by default. Set `GtaVUseBorealisGeometry=false` to build the decoded-geometry benchmark baseline. The default defines `GTAV_BOREALIS_GEOMETRY` and compiles the stored-geometry path. It selects that path when Borealis GPU rendering is requested or on a dedicated server. Both variants use the same water and destruction code.
