@@ -23,10 +23,14 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 	readonly Dictionary<LodEntityId, GameObject> visible = new();
 	readonly HashSet<Placement> moved = new();
 	readonly HashSet<Placement> pendingPromotion = new();
+#if GTAV_FORK_EXTENSIONS
 	readonly GameObject dynamicRoot = new GameObject( world.Scene, true, "GtaWorldDynamic" )
 	{
 		Flags = GameObjectFlags.NotSaved | GameObjectFlags.NotNetworked | GameObjectFlags.GroupRoots
 	};
+#else
+	readonly HashSet<GameObject> looseGibs = new();
+#endif
 
 	internal GameObject AddModel( LodEntityId id, WorldEntity entity, Model model, bool physics )
 	{
@@ -46,17 +50,22 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 				p.Prop = obj.AddComponent<Prop>();
 				p.Prop.IsStatic = anchored;
 				p.Prop.StartAsleep = true;
-				p.Prop.PhysicsEnabled = physics;
 				p.Prop.Model = model;
 				GtaDestructionPresentation.Attach( p.Prop );
 				if ( entity.IsObject ) p.Prop.Health = ArchetypePhysics.ObjectHealth;
 				damage.AttachProp( id, p.Prop );
 				p.Prop.OnGibsCreated += GroupGibs;
 				p.Seats = ChairArchetypes.Attach( obj, entity.ModelPath );
+#if GTAV_FORK_EXTENSIONS
+				GtaPropPhysics.SetEnabled( p.Prop, physics );
+#endif
 				SetSeatTriggers( p, physics );
 				if ( p.Seats.Length > 0 ) p.Prop.OnPropBreak += () => ChairArchetypes.Eject( p.Seats );
 			}
 			obj.Enabled = true;
+#if !GTAV_FORK_EXTENSIONS
+			if ( p.Prop.IsValid() ) GtaPropPhysics.SetEnabled( p.Prop, physics );
+#endif
 			if ( !anchored && p.Prop.IsValid() )
 			{
 				var origin = obj.WorldTransform;
@@ -75,7 +84,7 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 		{
 			p.Physics = true;
 			SetSeatTriggers( p, true );
-			if ( p.Prop.IsValid() ) p.Prop.PhysicsEnabled = true;
+			if ( p.Prop.IsValid() ) GtaPropPhysics.SetEnabled( p.Prop, true );
 			else
 			{
 				p.Collider = p.Object.Components.GetOrCreate<ModelCollider>();
@@ -96,8 +105,28 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 
 	void GroupGibs( List<Gib> pieces )
 	{
+#if !GTAV_FORK_EXTENSIONS
+		looseGibs.RemoveWhere( obj => !obj.IsValid() );
+#endif
 		foreach ( var piece in pieces )
-			if ( piece.IsValid() && !(Networking.IsActive && piece.Network.Active) ) piece.GameObject.SetParent( dynamicRoot, true );
+		{
+			if ( !piece.IsValid() || Networking.IsActive && piece.Network.Active ) continue;
+			var obj = piece.GameObject;
+			MoveToGameplayRoot( obj );
+#if !GTAV_FORK_EXTENSIONS
+			looseGibs.Add( obj );
+#endif
+		}
+	}
+
+	void MoveToGameplayRoot( GameObject obj )
+	{
+#if GTAV_FORK_EXTENSIONS
+		obj.SetParent( dynamicRoot, true );
+#else
+		obj.Flags |= GameObjectFlags.NotSaved | GameObjectFlags.NotNetworked;
+		obj.SetParent( null, true );
+#endif
 	}
 
 	static void SetSeatTriggers( Placement placement, bool enabled )
@@ -138,7 +167,7 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 			{
 				ChairArchetypes.Eject( p.Seats );
 				SetSeatTriggers( p, false );
-				if ( p.Prop.IsValid() ) p.Prop.PhysicsEnabled = false;
+				if ( p.Prop.IsValid() ) GtaPropPhysics.SetEnabled( p.Prop, false );
 				if ( p.Collider.IsValid() ) p.Collider.Enabled = false;
 			}
 			else Display( obj, false );
@@ -162,7 +191,7 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 		{
 			if ( !p.Object.IsValid() ) continue;
 			p.Object.Transform.OnTransformChanged -= p.OnMovement;
-			p.Object.SetParent( dynamicRoot, true );
+			MoveToGameplayRoot( p.Object );
 			moved.Add( p );
 		}
 		pendingPromotion.Clear();
@@ -171,7 +200,10 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 			if ( !p.Object.IsValid() ) continue;
 			var pos = p.Object.WorldPosition;
 			bool physics = physical.DistanceSquared( pos / PacketReader.UnitsPerMetre ) <= 80 * 80;
-			p.Prop.PhysicsEnabled = physics;
+			GtaPropPhysics.SetEnabled( p.Prop, physics );
+#if GTAV_FORK_EXTENSIONS
+				GtaPropPhysics.SetEnabled( p.Prop, physics );
+#endif
 			SetSeatTriggers( p, physics );
 			var distance = p.LodDistance * Sandbox.Mounting.GtaWorldStreamingSystem.LodScale * PacketReader.UnitsPerMetre;
 			SetRendererEnabled( p.Object, camera.HasValue && (distance <= 0 || pos.DistanceSquared( camera.Value ) <= distance * distance) );
@@ -187,6 +219,12 @@ internal sealed class PlacementHierarchy( GameObject world, StreamedDestructible
 			ChairArchetypes.Eject( p.Seats );
 			p.Object.Destroy();
 		}
+#if GTAV_FORK_EXTENSIONS
 		if ( dynamicRoot.IsValid() ) dynamicRoot.Destroy();
+#else
+		foreach ( var gib in looseGibs )
+			if ( gib.IsValid() ) gib.Destroy();
+		looseGibs.Clear();
+#endif
 	}
 }

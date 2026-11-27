@@ -101,7 +101,7 @@ internal static class Placements
 				if ( prop is not null )
 				{
 					if ( (flags & PlacementFlags.Fixed) != 0 ) prop.IsStatic = true;
-					if ( (flags & PlacementFlags.SuppressEmbeddedCollision) != 0 ) prop.PhysicsEnabled = false;
+					if ( (flags & PlacementFlags.SuppressEmbeddedCollision) != 0 ) GtaPropPhysics.SetEnabled( prop, false );
 				}
 				else if ( (flags & PlacementFlags.SuppressEmbeddedCollision) != 0 )
 				{

@@ -142,24 +142,5 @@ internal readonly record struct Shoreline( BBox Bounds, float Height = 0, float 
 	}
 
 	internal GameObject Create( GameObject parent, Material material )
-	{
-		var obj = new GameObject( parent, false, Bounds.Center.z == 0 ? "Coastal water" : "Inland water" );
-		obj.Flags |= GameObjectFlags.NotSaved | GameObjectFlags.NotNetworked;
-		obj.NetworkMode = NetworkMode.Never;
-		obj.WorldPosition = Bounds.Center * PacketReader.UnitsPerMetre;
-		var water = obj.Components.Create<WaterBody>();
-		water.CaptureRefraction = false;
-		if ( material is not null ) water.Material = material;
-		water.SharedSwellHeight = Bounds.Center.z == 0 ? 0.12f * PacketReader.UnitsPerMetre : 0;
-		water.Waves = Height > 0 || water.SharedSwellHeight > 0;
-		water.WaveHeight = Height * PacketReader.UnitsPerMetre;
-		water.WaveDirection = Heading;
-		water.WaveEdgeFade = Math.Min( 12f, 0.25f * Math.Min( Bounds.Size.x, Bounds.Size.y ) ) * PacketReader.UnitsPerMetre;
-		water.WaveLength = 28f * PacketReader.UnitsPerMetre;
-		water.Size = new Vector2( Bounds.Size.x, Bounds.Size.y ) * PacketReader.UnitsPerMetre;
-		// This open-sea quad has no authored bottom. Use a finite 100 m physics envelope.
-		water.Depth = 100f * PacketReader.UnitsPerMetre;
-		obj.Enabled = true;
-		return obj;
-	}
+		=> GtaWaterSurface.Create( parent, material, Bounds, Height, Heading );
 }

@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <GtaVUseBorealisGeometry Condition="'$(GtaVUseBorealisGeometry)' == ''">true</GtaVUseBorealisGeometry>
+    <GtaVUseBorealisGeometry Condition="'$(GtaVUseBorealisGeometry)' == ''">false</GtaVUseBorealisGeometry>
+    <GtaVUseForkExtensions Condition="'$(GtaVUseForkExtensions)' == ''">$(GtaVUseBorealisGeometry)</GtaVUseForkExtensions>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <SboxEngineDir Condition="'$(SboxEngineDir)' == ''">$(FACEPUNCH_ENGINE)</SboxEngineDir>
@@ -11,6 +12,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(GtaVUseBorealisGeometry)' == 'true'">
     <DefineConstants>$(DefineConstants);GTAV_BOREALIS_GEOMETRY</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GtaVUseForkExtensions)' == 'true'">
+    <DefineConstants>$(DefineConstants);GTAV_FORK_EXTENSIONS</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <AssemblyMetadata Include="Ident" Value="gtav" />
