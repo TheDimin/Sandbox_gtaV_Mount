@@ -17,10 +17,10 @@ Without this variable, the mount looks for the Steam or Rockstar installation. P
 For the optimized geometry path, use the [Borealis build on TheDimin/sbox-public master](https://github.com/TheDimin/sbox-public/tree/master). From the engine repository, run `Setup.bat`. Then build the engine with `dotnet run --project engine/Tools/SboxBuild/SboxBuild.csproj -- build --config Developer`. Then run this command from the mount repository. Set `SboxEngineDir` to the fork's `game` folder.
 
 ```powershell
-dotnet build -c Release "-p:SboxEngineDir=C:\src\sbox-public\game" -p:GtaVUseBorealisGeometry=true
+dotnet build -c Release "-p:SboxEngineDir=C:\src\sbox-public\game" -p:GtaVUseForkDirectGeometryUpload=true
 ```
 
-`GtaVUseBorealisGeometry=true` defines `GTAV_BOREALIS_GEOMETRY` and enables the fork extensions by default. The mount uses stored geometry when the Borealis GPU renderer is active or on a dedicated server. To build against Facepunch's stock `borealis` branch, omit the geometry option. The default build decodes geometry at runtime and can stream more slowly.
+`GtaVUseForkDirectGeometryUpload=true` defines `GTAV_FORK_DIRECT_GEOMETRY_UPLOAD` and enables the fork extensions by default. The mount uses stored geometry when the Borealis GPU renderer is active or on a dedicated server. To build against Facepunch's stock `borealis` branch, omit the geometry option. Both builds render with Borealis when its GPU renderer is active. The stock build supplies geometry through the s&box model API. Existing build commands can still use `GtaVUseBorealisGeometry` as a build-property alias.
 
 Copy `Sandbox.Mounting.GtaV.dll`, `Assets`, and `licenses` from `bin/Release` into `game/mounts/gtav` in the engine checkout. The fork build also writes a GTA mount DLL to this folder. Replace that DLL with the one you just built.
 

@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <GtaVUseBorealisGeometry Condition="'$(GtaVUseBorealisGeometry)' == ''">false</GtaVUseBorealisGeometry>
-    <GtaVUseForkExtensions Condition="'$(GtaVUseForkExtensions)' == ''">$(GtaVUseBorealisGeometry)</GtaVUseForkExtensions>
+    <GtaVUseForkDirectGeometryUpload Condition="'$(GtaVUseForkDirectGeometryUpload)' == '' And '$(GtaVUseBorealisGeometry)' != ''">$(GtaVUseBorealisGeometry)</GtaVUseForkDirectGeometryUpload>
+    <GtaVUseForkDirectGeometryUpload Condition="'$(GtaVUseForkDirectGeometryUpload)' == ''">false</GtaVUseForkDirectGeometryUpload>
+    <GtaVUseForkExtensions Condition="'$(GtaVUseForkExtensions)' == ''">$(GtaVUseForkDirectGeometryUpload)</GtaVUseForkExtensions>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <SboxEngineDir Condition="'$(SboxEngineDir)' == ''">$(FACEPUNCH_ENGINE)</SboxEngineDir>
@@ -10,8 +11,8 @@
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
     <GenerateDependencyFile>false</GenerateDependencyFile>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(GtaVUseBorealisGeometry)' == 'true'">
-    <DefineConstants>$(DefineConstants);GTAV_BOREALIS_GEOMETRY</DefineConstants>
+  <PropertyGroup Condition="'$(GtaVUseForkDirectGeometryUpload)' == 'true'">
+    <DefineConstants>$(DefineConstants);GTAV_FORK_DIRECT_GEOMETRY_UPLOAD</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(GtaVUseForkExtensions)' == 'true'">
     <DefineConstants>$(DefineConstants);GTAV_FORK_EXTENSIONS</DefineConstants>
@@ -19,7 +20,7 @@
   <ItemGroup>
     <AssemblyMetadata Include="Ident" Value="gtav" />
     <Reference Include="$(SboxManagedDir)/Sandbox.*.dll" Exclude="$(SboxManagedDir)/Sandbox.Mounting.GtaV.dll;$(SboxManagedDir)/Sandbox.Test.*.dll" Private="false" />
-    <Reference Include="$(SboxManagedDir)/Borealis*.dll" Private="false" Condition="'$(GtaVUseBorealisGeometry)' == 'true'" />
+    <Reference Include="$(SboxManagedDir)/Borealis*.dll" Private="false" Condition="'$(GtaVUseForkDirectGeometryUpload)' == 'true'" />
     <None Update="ManagedReader/ThirdPartyNotices.txt" TargetPath="licenses/ThirdPartyNotices.txt" CopyToOutputDirectory="PreserveNewest" />
     <None Update="LICENSE.md" TargetPath="licenses/Facepunch-MIT.md" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Assets/**/*" CopyToOutputDirectory="PreserveNewest" />

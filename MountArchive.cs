@@ -10,7 +10,7 @@ namespace GtaV;
 
 /// <summary>Keeps the resource catalog and its requests in the same managed file ID space.</summary>
 internal sealed class MountArchive( string directory
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 	, bool storedGeometry
 #endif
  ) : IDisposable
@@ -39,7 +39,7 @@ internal sealed class MountArchive( string directory
 		if ( entry.Kind == Kind.Collision ) return new( Read( entry ) );
 		using var stage = new StreamMeasurements.Stage( "model_decode" );
 		var drawable = archive.ReadDrawable( entry );
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 		if ( storedGeometry ) return new( drawable );
 #endif
 		using ( drawable ) return new( ModelRenderPacket.Read( drawable ) );
@@ -49,7 +49,7 @@ internal sealed class MountArchive( string directory
 	{
 		using var stage = new StreamMeasurements.Stage( "model_dictionary_batch" );
 		archive.ReadDictionaryModels( request
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 			, storedGeometry
 #endif
 		);

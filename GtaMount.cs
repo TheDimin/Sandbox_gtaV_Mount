@@ -41,7 +41,7 @@ public sealed class GtaMount : BaseGameMount, IGtaWorldSource
 
 	protected override Task Mount( MountContext context )
 	{
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 		archive = new MountArchive( directory, storedGeometry: Graphics.BorealisGpuRequested || Application.IsDedicatedServer );
 #else
 		archive = new MountArchive( directory );

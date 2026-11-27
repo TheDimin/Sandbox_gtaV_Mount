@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 using GtaV.ManagedReader;
 #endif
 
@@ -12,7 +12,7 @@ internal readonly struct PreparedModelData : IDisposable
 	internal BinaryReader Packet { get; }
 
 	internal PreparedModelData( BinaryReader packet ) => Packet = packet;
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 	internal MountedDrawable Drawable { get; }
 	internal PreparedModelData( MountedDrawable drawable ) => Drawable = drawable;
 #endif
@@ -20,7 +20,7 @@ internal readonly struct PreparedModelData : IDisposable
 	public void Dispose()
 	{
 		Packet?.Dispose();
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 		Drawable?.Dispose();
 #endif
 	}

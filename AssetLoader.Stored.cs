@@ -1,4 +1,4 @@
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;

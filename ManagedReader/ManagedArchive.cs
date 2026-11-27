@@ -69,12 +69,12 @@ internal sealed class ManagedArchive : IDisposable
 	}
 
 	internal void ReadDictionaryModels( DictionaryModelRead request
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 		, bool storedGeometry
 #endif
 	)
 	{
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 		var upload = storedGeometry ? new Borealis.Backend.StoredGeometryUpload() : null;
 		List<(DrawableGeometry Geometry, Borealis.Backend.StoredGeometryUpload.Slice Slice)> slices = storedGeometry ? new() : null;
 #endif
@@ -92,7 +92,7 @@ internal sealed class ManagedArchive : IDisposable
 #pragma warning disable CA2000 // A stored result transfers ownership to the placement; the finally disposes all other results.
 					drawable = new MountedDrawable( index, content, collision, file, member.Entry, shared.Resource, shared.Dispose );
 #pragma warning restore CA2000
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 					if ( storedGeometry )
 					{
 						drawable.StageGeometry( upload, slices );
@@ -106,7 +106,7 @@ internal sealed class ManagedArchive : IDisposable
 				catch ( Exception error ) { member.Completion.TrySetException( error ); }
 				finally { drawable?.Dispose(); }
 			}
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 			if ( upload is not null )
 			{
 				upload.Allocate();
@@ -117,7 +117,7 @@ internal sealed class ManagedArchive : IDisposable
 		}
 		catch ( Exception error )
 		{
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 			upload?.Abandon();
 #endif
 			while ( request.Take() is { } member ) member.Completion.TrySetException( error );
@@ -156,7 +156,7 @@ internal sealed class MountedDrawable : IDisposable
 {
 	internal DrawableAsset Geometry { get; }
 	internal BinaryReader Metadata { get; }
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 	internal Borealis.Backend.StoredGeometryUpload.Slice[] UploadSlices { get; private set; }
 
 	internal void StageGeometry( Borealis.Backend.StoredGeometryUpload upload,

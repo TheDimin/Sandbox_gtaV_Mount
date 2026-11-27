@@ -141,7 +141,7 @@ internal sealed partial class AssetLoader( Entry entry ) : ResourceLoader<GtaMou
 
 	internal Queue<AssetLoader> ExternalTextures( PreparedModelData data, bool colorOnly )
 	{
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 		if ( data.Drawable is { } drawable ) return ExternalTextures( drawable.Geometry, colorOnly );
 #endif
 		return ExternalTextures( data.Packet, colorOnly );
@@ -265,7 +265,7 @@ internal sealed partial class AssetLoader( Entry entry ) : ResourceLoader<GtaMou
 		if ( entry.Kind == Kind.Texture )
 		{
 			using var data = prepared ?? ReadPacket();
-			var texture = StreamMeasurements.FromDds( data.ReadBytes( checked((int)data.BaseStream.Length) ), Path );
+			var texture = StreamMeasurements.FromDds( data, Path );
 			if ( texture.IsValid() )
 			{
 				fullTexture = new( texture );
@@ -285,7 +285,7 @@ internal sealed partial class AssetLoader( Entry entry ) : ResourceLoader<GtaMou
 
 	Model BuildModel( PreparedModelData data )
 	{
-#if GTAV_BOREALIS_GEOMETRY
+#if GTAV_FORK_DIRECT_GEOMETRY_UPLOAD
 		if ( data.Drawable is { } drawable ) return BuildStoredModel( drawable );
 #endif
 		return BuildLegacyModel( data.Packet );

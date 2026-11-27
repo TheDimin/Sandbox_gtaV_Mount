@@ -2,6 +2,7 @@ using System;
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using System.IO;
 using Sandbox;
 using Sandbox.Mounting;
 
@@ -34,7 +35,17 @@ internal static class StreamMeasurements
 		}
 	}
 
-	internal static Texture FromDds( byte[] bytes, string path )
+	internal static Texture FromDds( BinaryReader reader, string path )
+	{
+		var stream = reader.BaseStream;
+		int length = checked((int)(stream.Length - stream.Position));
+		if ( stream is MemoryStream memory && memory.TryGetBuffer( out var buffer ) )
+			return FromDds( buffer.AsSpan( checked((int)memory.Position), length ), path );
+
+		return FromDds( reader.ReadBytes( length ), path );
+	}
+
+	internal static Texture FromDds( ReadOnlySpan<byte> bytes, string path )
 	{
 		bytes = ExpandAlphaDds( bytes );
 		if ( !Upload.Enabled ) return TextureLoader.FromDds( bytes );
@@ -49,7 +60,7 @@ internal static class StreamMeasurements
 
 	// Preserve the A8 mask as (0, 0, 0, alpha) through upload,
 	// including the authored mip chain, instead of exposing the mask as red.
-	static byte[] ExpandAlphaDds( byte[] bytes )
+	static ReadOnlySpan<byte> ExpandAlphaDds( ReadOnlySpan<byte> bytes )
 	{
 		const int headerSize = 128;
 		if ( bytes.Length <= headerSize || ReadWord( bytes, 0 ) != 0x20534444 ||
@@ -66,7 +77,7 @@ internal static class StreamMeasurements
 		if ( pixels != bytes.Length - headerSize || pixels > (int.MaxValue - headerSize) / 4 ) return bytes;
 
 		var rgba = new byte[headerSize + (int)pixels * 4];
-		bytes.AsSpan( 0, headerSize ).CopyTo( rgba );
+		bytes[..headerSize].CopyTo( rgba );
 		WriteWord( rgba, 20, width * 4 );
 		WriteWord( rgba, 80, 0x41 ); // RGB and alpha.
 		WriteWord( rgba, 88, 32 );
@@ -79,6 +90,6 @@ internal static class StreamMeasurements
 		return rgba;
 	}
 
-	static int ReadWord( byte[] bytes, int offset ) => BinaryPrimitives.ReadInt32LittleEndian( bytes.AsSpan( offset ) );
+	static int ReadWord( ReadOnlySpan<byte> bytes, int offset ) => BinaryPrimitives.ReadInt32LittleEndian( bytes[offset..] );
 	static void WriteWord( byte[] bytes, int offset, int value ) => BinaryPrimitives.WriteInt32LittleEndian( bytes.AsSpan( offset ), value );
 }
